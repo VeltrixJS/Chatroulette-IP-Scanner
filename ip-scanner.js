@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Chatroulette IP Scanner FINAL v12.0
+// @name         Chatroulette IP Scanner
 // @namespace    http://tampermonkey.net/
-// @version      12.0
-// @description  IP Tracker - Interface exacte style Azar
-// @author       YourName
+// @version      1.0
+// @description  IP Tracker for Chatroulette
+// @author       VeltrixJS
 // @match        https://chatroulette.com/*
 // @match        https://*.chatroulette.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatroulette.com
