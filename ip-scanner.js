@@ -14,9 +14,6 @@
 (function() {
     'use strict';
 
-    console.log('%c🎯 IP SCANNER FINAL v12.0', 'color: #ffd22e; font-weight: bold; font-size: 18px;');
-
-    // Configuration
     const CONFIG = {
         COLORS: {
             primary: '#ffd22e',
@@ -28,7 +25,6 @@
         }
     };
 
-    // State
     const state = {
         myIPs: new Set(),
         sessionIPs: new Map(),
@@ -41,7 +37,6 @@
         initTimeout: null
     };
 
-    // Utilitaires
     const utils = {
         isPublicIP(ip) {
             if (!ip || ip === '0.0.0.0') return false;
@@ -50,10 +45,7 @@
         },
 
         isKnownServerIP(ip) {
-            const knownServers = [
-                '206.81.27', '102.105.120', '81.49.17', '154.127.57',
-                '142.250', '172.217', '216.58', '74.125'
-            ];
+            const knownServers = ['206.81.27', '102.105.120', '81.49.17', '154.127.57', '142.250', '172.217', '216.58', '74.125'];
             return knownServers.some(prefix => ip.startsWith(prefix));
         },
 
@@ -61,7 +53,6 @@
             const ipRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
             const matches = candidateStr.match(ipRegex) || [];
             const validIPs = [];
-
             const parts = candidateStr.split(' ');
             const type = parts[7] || 'unknown';
 
@@ -69,9 +60,7 @@
                 if (!utils.isPublicIP(ip)) continue;
                 if (utils.isKnownServerIP(ip)) continue;
                 if (state.myIPs.has(ip)) continue;
-
                 validIPs.push({ ip, type });
-                console.log(`✅ IP: ${ip} (${type})`);
             }
 
             return validIPs;
@@ -113,19 +102,10 @@
                     if (res && res.status !== 'fail' && !res.error) {
                         return api.parse(res);
                     }
-                } catch (e) {
-                    console.log(`API échouée: ${e.message}`);
-                }
+                } catch (e) {}
             }
 
-            return {
-                city: 'Unknown',
-                region: 'Unknown',
-                postal: '',
-                country: 'Unknown',
-                isp: 'N/A',
-                vpn: false
-            };
+            return { city: 'Unknown', region: 'Unknown', postal: '', country: 'Unknown', isp: 'N/A', vpn: false };
         },
 
         createDisplay(ip, data, time) {
@@ -133,7 +113,6 @@
             const dept = (postal && postal.length >= 2) ? postal.substring(0, 2) : '??';
             const vpnBadge = vpn ? `<span style="background:${CONFIG.COLORS.red};color:white;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;margin-left:8px;">🚨 VPN/PROXY</span>` : '';
             const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(city + ' ' + country)}`;
-
             const itemStyle = `display:flex;flex-direction:column;background-color:${CONFIG.COLORS.gray};border-left:4px solid ${CONFIG.COLORS.primary};padding:15px;margin-bottom:12px;border-radius:8px;color:${CONFIG.COLORS.white};`;
             const btnStyle = `padding:8px;border:none;background:${CONFIG.COLORS.primary};color:${CONFIG.COLORS.dark};border-radius:6px;cursor:pointer;font-weight:600;transition:all 0.2s;`;
 
@@ -170,8 +149,6 @@
 
             state.shownIPs.add(ip);
             const time = new Date().toLocaleTimeString();
-
-            // Affichage immédiat avec données minimales
             const tempData = { city: 'Loading...', region: 'Loading...', postal: '', country: 'Loading...', isp: 'Loading...', vpn: false };
             const { element, html } = utils.createDisplay(ip, tempData, time);
 
@@ -184,7 +161,6 @@
                 state.popup.document.getElementById('ip-addresses').innerHTML = html;
             }
 
-            // Charger géoloc en arrière-plan
             utils.fetchGeo(ip).then(data => {
                 const { element: newElement, html: newHtml } = utils.createDisplay(ip, data, time);
 
@@ -311,30 +287,21 @@
         }
     };
 
-    // ================== INJECTION WEBRTC ==================
-    console.log('[WEBRTC] Installation...');
-
     const OriginalRTC = window.RTCPeerConnection || window.webkitRTCPeerConnection;
 
-    if (!OriginalRTC) {
-        alert('❌ WebRTC non disponible');
-    } else {
+    if (OriginalRTC) {
         window.RTCPeerConnection = function(...args) {
             const now = Date.now();
 
             if (now - state.lastConnectionTime > 2000) {
                 state.rtcCount++;
-                console.log(`🔌 Connexion #${state.rtcCount}`);
 
-                // Initialisation plus courte (1 seconde au lieu de 3)
                 if (state.rtcCount === 1 && !state.isReady) {
                     if (state.initTimeout) clearTimeout(state.initTimeout);
                     state.initTimeout = setTimeout(() => {
                         state.isReady = true;
-                        console.log('✅ Prêt pour capture!');
                     }, 1000);
                 } else if (state.isReady) {
-                    // Nouvelle personne
                     state.sessionIPs.clear();
                 }
             }
@@ -349,14 +316,11 @@
                 const validIPs = utils.extractIPs(candidateString);
 
                 if (!state.isReady) {
-                    // Phase init: enregistrer mes IPs
                     validIPs.forEach(ipData => state.myIPs.add(ipData.ip));
                 } else {
-                    // Phase active: afficher les IPs
                     validIPs.forEach(ipData => {
                         if (!state.sessionIPs.has(ipData.ip)) {
                             state.sessionIPs.set(ipData.ip, ipData);
-                            console.log(`🎯 NOUVELLE IP: ${ipData.ip}`);
                             utils.displayIP(ipData.ip, ipData.type);
                         }
                     });
@@ -391,10 +355,8 @@
         };
 
         window.RTCPeerConnection.prototype = OriginalRTC.prototype;
-        console.log('✅ Intercepteur installé');
     }
 
-    // ================== UI ==================
     function createUI() {
         const btnStyle = `padding:8px;border:none;background:${CONFIG.COLORS.primary};color:${CONFIG.COLORS.dark};border-radius:6px;cursor:pointer;font-weight:600;transition:all 0.2s;`;
 
@@ -439,7 +401,6 @@
 
         document.body.appendChild(container);
 
-        // Mini button
         const miniBtn = document.createElement('div');
         miniBtn.id = 'mini-ip-container';
         miniBtn.innerHTML = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="${CONFIG.COLORS.primary}" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
@@ -469,7 +430,6 @@
             miniBtn
         };
 
-        // Events
         document.getElementById('open-popup').onclick = () => utils.openPopup();
 
         document.getElementById('close-ip-container').onclick = () => {
@@ -479,7 +439,6 @@
             miniBtn.style.display = 'flex';
         };
 
-        // Dragging avec détection de clic vs drag
         const makeDrag = (el, handle) => {
             let pos = { x: 0, y: 0, mx: 0, my: 0 };
             let dragState = { active: false, startX: 0, startY: 0 };
@@ -494,7 +453,6 @@
                     document.onmousemove = null;
                     document.onmouseup = null;
 
-                    // Si c'est le mini bouton ET qu'il n'y a pas eu de drag
                     if (el.id === 'mini-ip-container' && !dragState.active) {
                         container.style.top = miniBtn.offsetTop + 'px';
                         container.style.left = miniBtn.offsetLeft + 'px';
@@ -504,7 +462,6 @@
                 };
 
                 document.onmousemove = (e) => {
-                    // Détection du drag (mouvement > 5px)
                     if (Math.abs(e.clientX - dragState.startX) > 5 || Math.abs(e.clientY - dragState.startY) > 5) {
                         dragState.active = true;
                     }
@@ -527,7 +484,6 @@
         if (document.body) {
             clearInterval(initInterval);
             createUI();
-            console.log('✅ Scanner prêt!');
         }
     }, 100);
 
