@@ -24,16 +24,16 @@
         innerHTML: `
             <div id="drag-handle" style="cursor:move;margin-bottom:20px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                    <h3 style="margin:0;color:${COLORS.primary};font-weight:800;text-transform:uppercase;letter-spacing:1px;">Detected IP</h3>
+                    <h3 style="margin:0;color:${COLORS.primary};font-weight:800;text-transform:uppercase;letter-spacing:1px;" translate="no">Detected IP</h3>
                     <div style="display:flex;gap:8px;">
-                        <button id="open-popup" style="${btnStyle}background:transparent;border:1px solid ${COLORS.primary};color:${COLORS.primary};font-size:12px;">📺 POPUP</button>
-                        <button id="close-ip-container" style="${btnStyle}font-weight:bold;">X</button>
+                        <button id="open-popup" style="${btnStyle}background:transparent;border:1px solid ${COLORS.primary};color:${COLORS.primary};font-size:12px;" translate="no">📺 POPUP</button>
+                        <button id="close-ip-container" style="${btnStyle}font-weight:bold;" translate="no">X</button>
                     </div>
                 </div>
             </div>
             <div id="ip-addresses"></div>
             <div style="margin-top:15px;text-align:center;">
-                <a href="https://github.com/VeltrixJS" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:${COLORS.border};color:${COLORS.primary};border:1px solid ${COLORS.primary};padding:8px 16px;text-decoration:none;font-weight:600;border-radius:8px;font-size:12px;transition:all 0.2s;" onmouseover="this.style.backgroundColor='${COLORS.primary}';this.style.color='${COLORS.dark}';" onmouseout="this.style.backgroundColor='${COLORS.border}';this.style.color='${COLORS.primary}';">
+                <a href="https://github.com/VeltrixJS" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:${COLORS.border};color:${COLORS.primary};border:1px solid ${COLORS.primary};padding:8px 16px;text-decoration:none;font-weight:600;border-radius:8px;font-size:12px;transition:all 0.2s;" onmouseover="this.style.backgroundColor='${COLORS.primary}';this.style.color='${COLORS.dark}';" onmouseout="this.style.backgroundColor='${COLORS.border}';this.style.color='${COLORS.primary}';" translate="no">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.757-1.333-1.757-1.089-.744.084-.729.084-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.835 2.809 1.304 3.495.997.108-.775.418-1.305.762-1.605-2.665-.305-5.466-1.332-5.466-5.93 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23a11.5 11.5 0 013.003-.404c1.018.005 2.045.138 3.003.404 2.292-1.552 3.298-1.23 3.298-1.23.653 1.653.242 2.873.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.61-2.803 5.624-5.475 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .319.218.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg> GitHub
                 </a>
             </div>
@@ -118,7 +118,9 @@
     const fetchIP = async (ip) => {
         const apis = [
             { url: `http://ip-api.com/json/${ip}?fields=country,regionName,city,zip,isp,proxy,hosting`, parse: d => ({ city: d.city, region: d.regionName, postal: d.zip, country: d.country, isp: d.isp, vpn: d.proxy || d.hosting }) },
-            { url: `https://ipapi.co/${ip}/json/`, parse: d => ({ city: d.city, region: d.region, postal: d.postal, country: d.country_name, isp: d.org, vpn: false }) }
+            { url: `https://ipapi.co/${ip}/json/`, parse: d => ({ city: d.city, region: d.region, postal: d.postal, country: d.country_name, isp: d.org, vpn: false }) },
+            { url: `https://freeipapi.com/api/json/${ip}`, parse: d => ({ city: d.cityName, region: d.regionName, postal: d.zipCode, country: d.countryName, isp: d.org || 'N/A', vpn: d.isProxy || false }) },
+            { url: `https://ipwhois.app/json/${ip}`, parse: d => ({ city: d.city, region: d.region, postal: d.postal, country: d.country, isp: d.isp, vpn: d.security?.vpn || d.security?.proxy || false }) }
         ];
         for (const api of apis) {
             try {
@@ -137,13 +139,13 @@
 
         const item = Object.assign(document.createElement('div'), {
             innerHTML: `
-                <div style="margin-bottom:8px;font-size:12px;opacity:0.6">Detected at: ${time}</div>
-                <div style="margin-bottom:4px"><strong style="color:${COLORS.primary}">IP:</strong> ${ip}${vpnBadge}</div>
-                <div style="margin-bottom:4px"><strong style="color:${COLORS.primary}">ISP:</strong> ${isp}</div>
-                <div style="margin-bottom:12px"><strong style="color:${COLORS.primary}">LOC:</strong> ${city}, ${region} (${dept}) - ${country}</div>
+                <div style="margin-bottom:8px;font-size:12px;opacity:0.6" translate="no">Detected at: ${time}</div>
+                <div style="margin-bottom:4px" translate="no"><strong style="color:${COLORS.primary}">IP:</strong> ${ip}${vpnBadge}</div>
+                <div style="margin-bottom:4px" translate="no"><strong style="color:${COLORS.primary}">ISP:</strong> ${isp}</div>
+                <div style="margin-bottom:12px" translate="no"><strong style="color:${COLORS.primary}">LOC:</strong> ${city}, ${region} (${dept}) - ${country}</div>
                 <div style="display:flex;gap:8px">
-                    <button class="copy-btn" style="${btnStyle}flex:1">Copy</button>
-                    <button class="maps-btn" style="${btnStyle}flex:1;background:${COLORS.white};color:${COLORS.dark}">Maps</button>
+                    <button class="copy-btn" style="${btnStyle}flex:1" translate="no">Copy</button>
+                    <button class="maps-btn" style="${btnStyle}flex:1;background:${COLORS.white};color:${COLORS.dark}" translate="no">Maps</button>
                 </div>
             `
         });
