@@ -91,11 +91,12 @@ Un script puissant pour analyser les adresses IP en temps réel sur [Chatroulett
 ## 📷 Aperçu
 
 ### Interface principale
-<img width="424" height="318" alt="image" src="https://github.com/user-attachments/assets/bb92389f-16ca-479e-8e6c-950652cbabe7" />
+<img width="400" height="351" alt="image" src="https://github.com/user-attachments/assets/474f953c-a7db-4924-90be-811040d2f52c" />
 
 
 ### Pop-up second écran 
-<img width="431" height="454" alt="image" src="https://github.com/user-attachments/assets/6d5ec5fc-60b7-4179-8c5d-585dae887126" />
+<img width="424" height="447" alt="image" src="https://github.com/user-attachments/assets/f59f9b82-8771-40c0-a024-1ea2f7296f4e" />
+
 
 ## ⚖️ Avertissement légal
 
