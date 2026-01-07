@@ -46,7 +46,9 @@ Un script puissant pour analyser les adresses IP en temps réel sur [Chatroulett
    - Rendez-vous sur [Chatroulette](https://chatroulette.com/app)
    - Le panneau apparaît automatiquement en haut à droite
    - Lancez un appel → L'IP s'affiche automatiquement
-
+   - 
+> ⚠️ **Note :** Le script ne fonctionne que apres une detection, donc si la premiere detection ne fonctionne pas c'est normal.
+ 
 ### Méthode 2 : Console du navigateur
 
 1. Ouvrez [Chatroulette](https://chatroulette.com/app)
@@ -57,6 +59,8 @@ Un script puissant pour analyser les adresses IP en temps réel sur [Chatroulett
 6. Appuyez sur **Entrée**
 
 > ⚠️ **Note :** Avec cette méthode, le script se désactive au rechargement de la page. Utilisez Tampermonkey pour une installation permanente.
+
+> ⚠️ **Note :** Le script ne fonctionne que apres une detection, donc si la premiere detection ne fonctionne pas c'est normal.
 
 ---
 ## 🔧 APIs utilisées
