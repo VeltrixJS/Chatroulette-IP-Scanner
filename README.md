@@ -65,10 +65,12 @@ Un script puissant pour analyser les adresses IP en temps réel sur [Chatroulett
 ---
 ## 🔧 APIs utilisées
 
-### Le script utilise 2 APIs gratuites avec système de fallback automatique :
+### Le script utilise 4 APIs gratuites avec système de fallback automatique :
 
 1. ip-api.com → 45 req/min, géolocalisation + ISP
 2. ipapi.co → 1000/jour, géolocalisation de secours
+3. freeipapi.com → ??, géolocalisation
+4. ipwhois.app → 10 000/mois, géolocalisation
 
 
 ## 📖 Utilisation
