@@ -63,7 +63,7 @@
 
     document.body.appendChild(miniBtn);
 
-    let popup = null, myIPs = new Set(), seenIPs = new Set(), isReady = false, lastConn = 0;
+    let popup = null, myIPs = new Set(), seenIPs = new Set(), isReady = false, lastConn = 0, rtcCount = 0;
 
     const setupEvents = () => {
         document.getElementById('open-popup').onclick = () => {
@@ -161,21 +161,27 @@
     const isPublicIP = (ip) => ip && ip !== '0.0.0.0' && ![/^10\./, /^172\.(1[6-9]|2[0-9]|3[0-1])\./, /^192\.168\./, /^127\./, /^169\.254\./].some(p => p.test(ip));
     const isKnownServer = (ip) => KNOWN_SERVERS.some(s => ip.startsWith(s));
 
-    window.oRTCPeerConnection = window.oRTCPeerConnection || window.RTCPeerConnection;
+    const OriginalRTC = window.RTCPeerConnection || window.webkitRTCPeerConnection;
 
-    window.RTCPeerConnection = function(...args) {
-        const now = Date.now();
-        if (now - lastConn > 2000) {
-            if (!isReady) setTimeout(() => isReady = true, 1000);
-            lastConn = now;
-        }
+    if (OriginalRTC) {
+        window.RTCPeerConnection = function(...args) {
+            const now = Date.now();
+            
+            if (now - lastConn > 2000) {
+                rtcCount++;
+                if (rtcCount === 1 && !isReady) {
+                    setTimeout(() => isReady = true, 1000);
+                }
+                lastConn = now;
+            }
 
-        const pc = new window.oRTCPeerConnection(...args);
-        pc.oaddIceCandidate = pc.addIceCandidate;
+            const pc = new OriginalRTC(...args);
 
-        pc.addIceCandidate = async function(iceCandidate, ...rest) {
-            if (iceCandidate?.candidate) {
-                const matches = iceCandidate.candidate.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g) || [];
+            const processCandidate = (candidateString) => {
+                if (!candidateString) return;
+
+                const matches = candidateString.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g) || [];
+                
                 for (const ip of matches) {
                     if (!isPublicIP(ip) || isKnownServer(ip) || myIPs.has(ip) || seenIPs.has(ip)) continue;
                     
@@ -187,17 +193,43 @@
                         ipAddresses.innerHTML = '';
                         if (popup && !popup.closed) popup.document.getElementById('ip-addresses').innerHTML = '';
 
-                        const data = await fetchIP(ip);
-                        const time = new Date().toLocaleTimeString();
-                        const { element, html } = createDisplay(ip, data, time);
-
-                        ipAddresses.appendChild(element);
-                        if (popup && !popup.closed) popup.document.getElementById('ip-addresses').innerHTML += html;
+                        fetchIP(ip).then(data => {
+                            const time = new Date().toLocaleTimeString();
+                            const { element, html } = createDisplay(ip, data, time);
+                            ipAddresses.appendChild(element);
+                            if (popup && !popup.closed) popup.document.getElementById('ip-addresses').innerHTML += html;
+                        });
                     }
                 }
-            }
-            return pc.oaddIceCandidate(iceCandidate, ...rest);
+            };
+
+            const origAdd = pc.addIceCandidate.bind(pc);
+            pc.addIceCandidate = async function(candidate, ...rest) {
+                if (candidate?.candidate) processCandidate(candidate.candidate);
+                return origAdd(candidate, ...rest);
+            };
+
+            const origOnIce = pc.onicecandidate;
+            pc.onicecandidate = function(event) {
+                if (event?.candidate?.candidate) processCandidate(event.candidate.candidate);
+                if (origOnIce) origOnIce.call(this, event);
+            };
+
+            const origAddEvent = pc.addEventListener.bind(pc);
+            pc.addEventListener = function(type, listener, ...rest) {
+                if (type === 'icecandidate') {
+                    const wrapped = function(event) {
+                        if (event?.candidate?.candidate) processCandidate(event.candidate.candidate);
+                        return listener.call(this, event);
+                    };
+                    return origAddEvent('icecandidate', wrapped, ...rest);
+                }
+                return origAddEvent(type, listener, ...rest);
+            };
+
+            return pc;
         };
-        return pc;
-    };
+
+        window.RTCPeerConnection.prototype = OriginalRTC.prototype;
+    }
 })();
